@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>인화생태지도</title>
+<style>
+  /* 시스템 폰트 먼저 선언 — Google Fonts 로드 실패해도 레이아웃 유지 */
+  @font-face {
+    font-family: 'Noto Serif KR';
+    src: local('Georgia'), local('serif');
+    font-weight: 400 700;
+    font-display: swap;
+  }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<style>
+  :root {
+    --green-deep: #1a3a2a;
+    --green-mid: #2d6a4f;
+    --green-light: #52b788;
+    --green-pale: #b7e4c7;
+    --green-mist: #d8f3dc;
+    --water-blue: #48cae4;
+    --water-deep: #0096c7;
+    --earth: #a8896a;
+    --cream: #f8f4ef;
+    --text-dark: #1a2e1a;
+    --text-mid: #3d5a3e;
+    --shadow: rgba(26,58,42,0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans KR', -apple-system, 'Apple SD Gothic Neo', '맑은 고딕', sans-serif;
+    background: var(--cream);
+    color: var(--text-dark);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── HEADER ─── */
+  header {
+    position: relative;
+    background: var(--green-deep);
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .header-bg {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 50%, rgba(82,183,136,0.18) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 30%, rgba(72,202,228,0.12) 0%, transparent 50%);
+  }
+
+  /* SVG leaf decorations */
+  .leaf-deco {
+    position: absolute;
+    opacity: 0.07;
+    pointer-events: none;
+  }
+
+  .header-inner {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 28px 48px;
+  }
+
+  .logo-area {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .logo-icon {
+    width: 52px; height: 52px;
+    background: linear-gradient(135deg, var(--green-light), var(--green-pale));
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px;
+    box-shadow: 0 4px 20px rgba(82,183,136,0.4);
+    animation: pulse-glow 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 4px 20px rgba(82,183,136,0.4); }
+    50% { box-shadow: 0 4px 32px rgba(82,183,136,0.7); }
+  }
+
+  .logo-text h1 {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+
+  .logo-text span {
+    font-size: 0.78rem;
+    color: var(--green-pale);
+    letter-spacing: 0.08em;
+    font-weight: 300;
+  }
+
+  nav {
+    display: flex;
+    gap: 8px;
+  }
+
+  nav button {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.85);
+    padding: 9px 20px;
+    border-radius: 100px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+
+  nav button:hover, nav button.active {
+    background: var(--green-light);
+    border-color: var(--green-light);
+    color: #fff;
+    transform: translateY(-1px);
+  }
+
+  /* ─── HERO BAND ─── */
+  .hero-band {
+    background: linear-gradient(135deg, var(--green-mid) 0%, var(--green-deep) 100%);
+    padding: 40px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-band::after {
+    content: '';
+    position: absolute;
+    bottom: -40px; right: -40px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: rgba(82,183,136,0.1);
+  }
+
+  .hero-text h2 {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1.9rem;
+    color: #fff;
+    font-weight: 700;
+    line-height: 1.35;
+    margin-bottom: 8px;
+  }
+
+  .hero-text p {
+    color: var(--green-pale);
+    font-size: 0.9rem;
+    font-weight: 300;
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 24px;
+    flex-shrink: 0;
+  }
+
+  .stat-card {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 16px;
+    padding: 16px 24px;
+    text-align: center;
+    backdrop-filter: blur(8px);
+    min-width: 90px;
+  }
+
+  .stat-card .num {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--green-pale);
+    line-height: 1;
+  }
+
+  .stat-card .label {
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.65);
+    margin-top: 4px;
+  }
+
+  /* ─── CATEGORY TABS ─── */
+  .category-bar {
+    background: #fff;
+    border-bottom: 1px solid rgba(0,0,0,0.07);
+    padding: 0 48px;
+    display: flex;
+    gap: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px var(--shadow);
+  }
+
+  .cat-tab {
+    padding: 16px 28px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-mid);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+
+  .cat-tab:hover { color: var(--green-mid); background: var(--green-mist); }
+  .cat-tab.active { color: var(--green-mid); border-bottom-color: var(--green-light); }
+
+  .cat-tab .emoji { font-size: 1.1rem; }
+
+  /* ─── MAIN LAYOUT ─── */
+  .main-layout {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 0;
+    min-height: calc(100vh - 200px);
+  }
+
+  /* ─── MAP AREA ─── */
+  .map-section {
+    padding: 32px 32px 32px 48px;
+  }
+
+  .section-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-title::before {
+    content: '';
+    display: inline-block;
+    width: 4px; height: 18px;
+    background: var(--green-light);
+    border-radius: 2px;
+  }
+
+  .map-container {
+    position: relative;
+    background: #e8f5e4;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 8px 40px var(--shadow);
+    border: 1px solid rgba(82,183,136,0.2);
+  }
+
+  .map-canvas {
+    width: 100%;
+    height: 500px;
+    display: block;
+  }
+
+  /* School map SVG */
+  .map-legend {
+    position: absolute;
+    bottom: 16px; left: 16px;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(8px);
+    border-radius: 12px;
+    padding: 12px 16px;
+    display: flex;
+    gap: 16px;
+    font-size: 0.75rem;
+    color: var(--text-mid);
+    box-shadow: 0 4px 16px var(--shadow);
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+
+  .map-controls {
+    position: absolute;
+    top: 16px; right: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .map-ctrl-btn {
+    width: 38px; height: 38px;
+    background: rgba(255,255,255,0.92);
+    border: none;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    box-shadow: 0 2px 8px var(--shadow);
+    transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .map-ctrl-btn:hover { background: var(--green-light); color: #fff; transform: scale(1.05); }
+
+  /* Marker */
+  .map-marker {
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    pointer-events: all;
+  }
+
+  /* iOS 터치 이벤트 활성화 */
+  .bio-card, .map-popup-item, .detail-back {
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* ─── 마커 팝업 ─── */
+  .map-popup {
+    display: none;
+    position: absolute;
+    z-index: 200;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 8px 32px rgba(26,58,42,0.18), 0 2px 8px rgba(0,0,0,0.10);
+    padding: 10px 8px 8px;
+    min-width: 180px;
+    max-width: 220px;
+    transform: translateX(-50%);
+    pointer-events: auto;
+  }
+  .map-popup.open { display: block; animation: popupIn 0.2s cubic-bezier(.34,1.56,.64,1); }
+  @keyframes popupIn {
+    from { opacity: 0; transform: translateX(-50%) translateY(8px) scale(0.95); }
+    to   { opacity: 1; transform: translateX(-50%) translateY(0)    scale(1);    }
+  }
+  /* 말풍선 꼬리 */
+  .map-popup::before {
+    content: '';
+    position: absolute;
+    bottom: -8px; left: 50%;
+    transform: translateX(-50%);
+    border: 8px solid transparent;
+    border-bottom: none;
+    border-top-color: #fff;
+    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.08));
+  }
+  .map-popup-title {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--green-mid);
+    padding: 0 6px 6px;
+    border-bottom: 1px solid var(--green-mist);
+    margin-bottom: 4px;
+    letter-spacing: 0.04em;
+  }
+  .map-popup-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 8px;
+    border-radius: 9px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .map-popup-item:hover { background: var(--green-mist); }
+  .map-popup-emoji { font-size: 1.25rem; flex-shrink: 0; }
+  .map-popup-info { min-width: 0; }
+  .map-popup-name { font-size: 0.85rem; font-weight: 600; color: var(--text-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .map-popup-loc  { font-size: 0.7rem; color: #aaa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+
+
+  /* ─── UPLOAD BUTTON ─── */
+  .upload-area {
+    margin-top: 20px;
+    border: 2px dashed var(--green-light);
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    background: rgba(82,183,136,0.04);
+    cursor: pointer;
+    transition: all 0.25s;
+    position: relative;
+  }
+
+  .upload-area:hover {
+    background: rgba(82,183,136,0.1);
+    border-color: var(--green-mid);
+    transform: translateY(-2px);
+  }
+
+  .upload-area input[type="file"] {
+    position: absolute; inset: 0;
+    opacity: 0; cursor: pointer;
+    width: 100%; height: 100%;
+  }
+
+  .upload-icon { font-size: 2rem; margin-bottom: 8px; }
+
+  .upload-area p { font-size: 0.88rem; color: var(--text-mid); }
+  .upload-area strong { color: var(--green-mid); }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar {
+    border-left: 1px solid rgba(0,0,0,0.07);
+    background: #fff;
+    padding: 32px 28px;
+    overflow-y: auto;
+    max-height: calc(100vh - 160px);
+    position: sticky;
+    top: 57px;
+  }
+
+  /* ─── BIO CARDS ─── */
+  .bio-card {
+    background: var(--cream);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 16px;
+    border: 1px solid rgba(0,0,0,0.06);
+    transition: all 0.25s;
+    cursor: pointer;
+  }
+
+  .bio-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 28px var(--shadow);
+    border-color: var(--green-pale);
+  }
+
+  .bio-card.active {
+    border-color: var(--green-light);
+    box-shadow: 0 0 0 2px rgba(82,183,136,0.25);
+  }
+
+  .bio-card-img {
+    width: 100%; height: 130px;
+    object-fit: cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3.5rem;
+    background: linear-gradient(135deg, var(--green-mist), var(--green-pale));
+  }
+
+  .bio-card-body {
+    padding: 14px 16px;
+  }
+
+  .bio-card-tag {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 0.7rem;
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+
+  .tag-plant { background: #d8f3dc; color: var(--green-mid); }
+  .tag-water { background: #caf0f8; color: var(--water-deep); }
+
+  .bio-card-name {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 2px;
+  }
+
+  .bio-card-sci {
+    font-size: 0.72rem;
+    color: #888;
+    font-style: italic;
+    margin-bottom: 6px;
+  }
+
+  .bio-card-desc {
+    font-size: 0.78rem;
+    color: var(--text-mid);
+    line-height: 1.6;
+  }
+
+  .bio-card-meta {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(0,0,0,0.06);
+    display: flex;
+    gap: 12px;
+    font-size: 0.72rem;
+    color: #999;
+  }
+
+  .bio-card-meta span { display: flex; align-items: center; gap: 4px; }
+
+  /* ─── ADD BUTTON ─── */
+  .btn-add {
+    width: 100%;
+    padding: 14px;
+    background: var(--green-mid);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .btn-add:hover { background: var(--green-deep); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(45,106,79,0.35); }
+
+  /* ─── MODAL ─── */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.45);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.2s;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .modal {
+    background: #fff;
+    border-radius: 24px;
+    width: 460px;
+    max-width: 92vw;
+    padding: 36px;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.2);
+    animation: slideUp 0.3s ease;
+  }
+
+  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+  .modal h3 {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1.25rem;
+    margin-bottom: 24px;
+    color: var(--text-dark);
+  }
+
+  .form-group { margin-bottom: 16px; }
+
+  .form-group label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-mid);
+    margin-bottom: 6px;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 10px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 0.88rem;
+    color: var(--text-dark);
+    transition: border-color 0.2s;
+    background: var(--cream);
+  }
+
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: var(--green-light);
+    background: #fff;
+  }
+
+  .form-group textarea { resize: vertical; min-height: 80px; }
+
+  .modal-btns {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+  }
+
+  .btn-cancel {
+    flex: 1;
+    padding: 12px;
+    background: var(--cream);
+    border: 1.5px solid #e0e0e0;
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 0.88rem;
+    color: #666;
+    transition: all 0.2s;
+  }
+
+  .btn-cancel:hover { background: #eee; }
+
+  .btn-submit {
+    flex: 2;
+    padding: 12px;
+    background: var(--green-mid);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+
+  .btn-submit:hover { background: var(--green-deep); }
+
+  /* ─── TOAST ─── */
+  .toast {
+    position: fixed;
+    bottom: 32px; left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--green-deep);
+    color: #fff;
+    padding: 12px 28px;
+    border-radius: 100px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    z-index: 2000;
+    transition: transform 0.35s cubic-bezier(.34,1.56,.64,1);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    pointer-events: none;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ─── SCROLL BAR ─── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--green-pale); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--green-light); }
+
+  /* ─── DETAIL PANEL ─── */
+  .detail-panel {
+    display: none;
+    animation: fadeIn 0.25s;
+  }
+  .detail-panel.open { display: block; }
+
+  .detail-back {
+    background: none; border: none;
+    color: var(--green-mid);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 0.82rem;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 6px;
+    padding: 0;
+    margin-bottom: 16px;
+  }
+
+  .detail-img {
+    width: 100%; height: 180px;
+    border-radius: 16px;
+    font-size: 5rem;
+    background: linear-gradient(135deg, var(--green-mist), var(--green-pale));
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 16px;
+  }
+
+  .detail-name {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 4px;
+  }
+
+  .detail-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 16px 0;
+  }
+
+  .detail-info-item {
+    background: var(--green-mist);
+    border-radius: 10px;
+    padding: 10px 14px;
+  }
+
+  .detail-info-item .key {
+    font-size: 0.68rem;
+    color: var(--green-mid);
+    font-weight: 500;
+    margin-bottom: 2px;
+  }
+
+  .detail-info-item .val {
+    font-size: 0.85rem;
+    color: var(--text-dark);
+    font-weight: 500;
+  }
+
+  /* ══════════════════════════════════
+     모바일 최적화 (태블릿 ~ 폰)
+  ══════════════════════════════════ */
+
+  /* ── 태블릿 (900px 이하) ── */
+  @media (max-width: 900px) {
+    .main-layout {
+      grid-template-columns: 1fr;
+    }
+    .sidebar {
+      max-height: none;
+      position: static;
+      border-left: none;
+      border-top: 1px solid rgba(0,0,0,0.07);
+    }
+    .header-inner { padding: 20px 24px; }
+    .map-section  { padding: 24px; }
+    .hero-band    { padding: 28px 24px; flex-direction: column; align-items: flex-start; }
+    .category-bar { padding: 0 16px; overflow-x: auto; }
+  }
+
+  /* ── 모바일 (600px 이하) ── */
+  @media (max-width: 600px) {
+
+    /* 헤더 */
+    .header-inner {
+      padding: 14px 16px;
+      gap: 10px;
+    }
+    .logo-icon { width: 40px; height: 40px; font-size: 20px; flex-shrink: 0; }
+    .logo-text h1 { font-size: 1.15rem; }
+    .logo-text span { display: none; } /* 영문 부제 숨김 */
+
+    /* 히어로 배너 */
+    .hero-band {
+      padding: 20px 16px;
+      gap: 16px;
+    }
+    .hero-text h2 { font-size: 1.25rem; }
+    .hero-text p  { font-size: 0.8rem; }
+    .hero-stats   { gap: 10px; width: 100%; }
+    .stat-card    { flex: 1; padding: 12px 8px; min-width: 0; }
+    .stat-card .num   { font-size: 1.4rem; }
+    .stat-card .label { font-size: 0.65rem; }
+
+    /* 카테고리 탭 */
+    .category-bar { padding: 0 8px; }
+    .cat-tab      { padding: 12px 14px; font-size: 0.8rem; }
+
+    /* 지도 영역 */
+    .map-section { padding: 16px; }
+    .section-title { font-size: 1rem; margin-bottom: 12px; }
+
+    /* 지도 캔버스: 폰에서 세로 비율 맞게 조정 */
+    .map-canvas { height: 320px; }
+
+    /* 범례 */
+    .map-legend {
+      padding: 8px 10px;
+      gap: 10px;
+      font-size: 0.68rem;
+      flex-wrap: wrap;
+    }
+
+    /* 팝업: 폰에서 너무 작아지지 않게 */
+    .map-popup {
+      min-width: 160px;
+      max-width: 200px;
+    }
+    .map-popup-name { font-size: 0.82rem; }
+
+    /* 사이드바 */
+    .sidebar { padding: 20px 16px; }
+    .section-title { font-size: 0.95rem; }
+
+    /* 생물 카드 */
+    .bio-card-img  { height: 100px; font-size: 2.8rem; }
+    .bio-card-body { padding: 12px 14px; }
+    .bio-card-name { font-size: 0.92rem; }
+    .bio-card-desc { font-size: 0.75rem; }
+
+    /* 상세 패널 */
+    .detail-img  { height: 140px; font-size: 4rem; }
+    .detail-name { font-size: 1.1rem; }
+    .detail-info-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+    .detail-info-item { padding: 8px 10px; }
+    .detail-info-item .key { font-size: 0.65rem; }
+    .detail-info-item .val { font-size: 0.8rem; }
+  }
+
+  /* ── 아주 작은 폰 (380px 이하, 갤럭시 A 시리즈 등) ── */
+  @media (max-width: 380px) {
+    .logo-text h1 { font-size: 1rem; }
+    .hero-text h2 { font-size: 1.1rem; }
+    .map-canvas   { height: 260px; }
+    .cat-tab      { padding: 10px 10px; font-size: 0.75rem; }
+    .cat-tab .emoji { display: none; } /* 탭 아이콘 숨겨서 텍스트만 */
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-bg"></div>
+  <svg class="leaf-deco" style="top:-20px;right:80px;width:320px;height:320px;" viewBox="0 0 200 200">
+    <ellipse cx="100" cy="100" rx="80" ry="40" fill="white" transform="rotate(-30 100 100)"/>
+    <ellipse cx="100" cy="100" rx="80" ry="40" fill="white" transform="rotate(30 100 100)"/>
+  </svg>
+  <div class="header-inner">
+    <div class="logo-area">
+      <div class="logo-icon">🌿</div>
+      <div class="logo-text">
+        <h1>인화생태지도</h1>
+      </div>
+    </div>
+
+  </div>
+</header>
+
+<!-- HERO BAND -->
+<div class="hero-band">
+  <div class="hero-text">
+    <h2>생명이 살아숨쉬는 우리 학교</h2>
+  </div>
+  <div class="hero-stats">
+    <div class="stat-card">
+      <div class="num" id="totalCount">12</div>
+      <div class="label">전체 생물</div>
+    </div>
+    <div class="stat-card">
+      <div class="num" id="plantCount">8</div>
+      <div class="label">식물/나무</div>
+    </div>
+    <div class="stat-card">
+      <div class="num" id="waterCount">4</div>
+      <div class="label">수생생물</div>
+    </div>
+  </div>
+</div>
+
+<!-- CATEGORY TABS -->
+<div class="category-bar">
+  <button class="cat-tab active" onclick="filterCat('all',this)">
+    <span class="emoji">🌍</span> 전체
+  </button>
+  <button class="cat-tab" onclick="filterCat('plant',this)">
+    <span class="emoji">🌿</span> 식물/나무
+  </button>
+  <button class="cat-tab" onclick="filterCat('water',this)">
+    <span class="emoji">🐠</span> 연못/수생생물
+  </button>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="main-layout">
+
+  <!-- MAP SECTION -->
+  <div class="map-section">
+    <div class="section-title">교내 생태 지도</div>
+
+    <div class="map-container">
+      <!--
+        인화여고 생태지도 SVG (수정 v3)
+        ─────────────────────────────────────────
+        레이아웃 기준 (viewBox 0 0 800 530):
+          · 꿈터:  x=420~620, y=38~175  (왼쪽으로 이동, 더 크게)
+          · 구름다리(꿈터↔본관): x=270~330, y=175~238 (이름 없음)
+          · 본관:  x=120~570, y=238~355 (왼쪽·작게)
+          · 급식실: x=22~162, y=370~500
+          · 연결로(본관↔급식실): x=120~162, y=355~370 (이름 없음)
+          · 연못:  cx=580, cy=440 (오른쪽으로)
+          · 화단:  좌상, 우상, 우하, 본관 아래
+        ─────────────────────────────────────────
+      -->
+      <svg class="map-canvas" viewBox="0 0 800 530" xmlns="http://www.w3.org/2000/svg" style="pointer-events:all;touch-action:manipulation;">
+        <defs>
+          <pattern id="grass" patternUnits="userSpaceOnUse" width="18" height="18">
+            <rect width="18" height="18" fill="#d0ead4"/>
+            <circle cx="4" cy="7" r="1.2" fill="#b5d9ba" opacity="0.7"/>
+            <circle cx="13" cy="13" r="1" fill="#b5d9ba" opacity="0.5"/>
+            <circle cx="9" cy="3" r="0.8" fill="#c2dfc7" opacity="0.5"/>
+          </pattern>
+         
+        </defs>
+
+        <!-- 배경 잔디 -->
+        <rect width="800" height="530" fill="url(#grass)"/>
+
+       
+        <!-- ═══ 건물들 ═══ -->
+
+        <!-- ① 꿈터 (x=120~620, y=38~175 / 너비500 높이137) -->
+        <rect x="230" y="38" width="500" height="137" rx="7" fill="#fdf6e3" stroke="#c8b97a" stroke-width="2.5" filter="url(#bshadow)"/>
+        <text x="480" y="118" text-anchor="middle" font-size="20" font-weight="700" fill="#5a4a1a" font-family="Noto Sans KR,sans-serif">꿈터</text>
+
+        <!-- ② 구름다리: 꿈터↔본관 (이름 없음, x=270~330, y=175~238) -->
+        <rect x="250" y="175" width="40" height="65" rx="5" fill="#e8e0d0" stroke="#b0a882" stroke-width="2" filter="url(#bshadow)"/>
+       
+        <!-- ③ 본관 (x=120~570, y=238~355 / 너비450 높이117) -->
+        <rect x="120" y="238" width="450" height="117" rx="7" fill="#eef4fb" stroke="#8aa8c8" stroke-width="2.5" filter="url(#bshadow)"/>
+               <text x="330" y="305" text-anchor="middle" font-size="20" font-weight="700" fill="#2a4a6a" font-family="Noto Sans KR,sans-serif">본관</text>
+
+        <!-- ④ 연결로: 본관↔급식실 (이름 없음, 가로 연결 복도 x=120~162, y=355~395) -->
+        <rect x="80" y="239" width="40" height="157" rx="4" fill="#e8e0d0" stroke="#b0a882" stroke-width="1.8"/>
+    
+        <!-- ⑤ 급식실 (x=22~162, y=395~505 / 너비140 높이110) -->
+        <rect x="22"  y="395" width="140" height="110" rx="7" fill="#fef0e6" stroke="#d4a870" stroke-width="2.5" filter="url(#bshadow)"/>
+        <text x="92"  y="458" text-anchor="middle" font-size="20" font-weight="700" fill="#7a4a10" font-family="Noto Sans KR,sans-serif">급식실</text>
+
+<g transform="translate(-120, 0)">
+  <!-- 연못 -->
+  <ellipse cx="578" cy="442" rx="66" ry="46" fill="#5bbee8" opacity="0.90" filter="url(#pshadow)"/>
+  <ellipse cx="578" cy="442" rx="50" ry="32" fill="#82d0f0" opacity="0.55"/>
+  <ellipse cx="563" cy="432" rx="17" ry="10" fill="#b8e8f8" opacity="0.50"/>
+  <ellipse cx="596" cy="452" rx="10" ry="7" fill="#4caf50" opacity="0.70" transform="rotate(-20 596 452)"/>
+  <ellipse cx="562" cy="456" rx="9" ry="6" fill="#388e3c" opacity="0.60" transform="rotate(15 562 456)"/>
+  <text x="578" y="448" text-anchor="middle" font-size="11" font-weight="700" fill="#01579b" font-family="Noto Sans KR,sans-serif">연못</text>
+</g>
+
+        <!-- ═══ 마커 ═══ -->
+        <!-- 식물 0: 좌상단 화단 -->
+        <g class="map-marker" data-zone="zone-left-top" onclick="handleMarkerClick(event,'zone-left-top',55,155)" id="marker-0">
+          <circle cx="55"  cy="155" r="19" fill="#2d6a4f" opacity="0.92"/>
+          <text   x="55"   y="161"  text-anchor="middle" font-size="14">🌸</text>
+          <circle cx="55"  cy="155" r="19" fill="none" stroke="white" stroke-width="2.2" opacity="0.85"/>
+        </g>
+        <!-- 식물 1: 우상단 화단 -->
+        <g class="map-marker" data-zone="zone-right-top" onclick="handleMarkerClick(event,'zone-right-top',710,100)" id="marker-1">
+          <circle cx="710" cy="100" r="19" fill="#2d6a4f" opacity="0.92"/>
+          <text   x="710"  y="106"  text-anchor="middle" font-size="14">🌳</text>
+          <circle cx="710" cy="100" r="19" fill="none" stroke="white" stroke-width="2.2" opacity="0.85"/>
+        </g>
+        <!-- 식물 2: 본관 아래 화단 -->
+        <g class="map-marker" data-zone="zone-front" onclick="handleMarkerClick(event,'zone-front',290,380)" id="marker-2">
+          <circle cx="290" cy="380" r="19" fill="#2d6a4f" opacity="0.92"/>
+          <text   x="290"  y="386"  text-anchor="middle" font-size="14">🌿</text>
+          <circle cx="290" cy="380" r="19" fill="none" stroke="white" stroke-width="2.2" opacity="0.85"/>
+        </g>
+        <!-- 식물 6: 본관 아래 화단 (추가 — 팝업 테스트용) -->
+        <g class="map-marker" data-zone="zone-front" onclick="handleMarkerClick(event,'zone-front',290,380)" id="marker-6">
+          <circle cx="310" cy="390" r="19" fill="#2d6a4f" opacity="0.92"/>
+          <text   x="310"  y="396"  text-anchor="middle" font-size="14">🌼</text>
+          <circle cx="310" cy="390" r="19" fill="none" stroke="white" stroke-width="2.2" opacity="0.85"/>
+        </g>
+        <!-- 식물 7: 본관 아래 화단 (추가 — 팝업 테스트용) -->
+        <g class="map-marker" data-zone="zone-front" onclick="handleMarkerClick(event,'zone-front',290,380)" id="marker-7">
+          <circle cx="270" cy="392" r="19" fill="#2d6a4f" opacity="0.92"/>
+          <text   x="270"  y="398"  text-anchor="middle" font-size="14">🍀</text>
+          <circle cx="270" cy="392" r="19" fill="none" stroke="white" stroke-width="2.2" opacity="0.85"/>
+        </g>
+        <!-- 식물 3: 우하단 화단 -->
+        <g class="map-marker" data-zone="zone-right-bottom" onclick="handleMarkerClick(event,'zone-right-bottom',720,440)" id="marker-3">
+          <circle cx="720" cy="440" r="19" fill="#2d6a4f" opacity="0.92"/>
+          <text   x="720"  y="446"  text-anchor="middle" font-size="14">🌲</text>
+          <circle cx="720" cy="440" r="19" fill="none" stroke="white" stroke-width="2.2" opacity="0.85"/>
+        </g>
+        <!-- 수생 4: 연못 좌측 -->
+        <g class="map-marker" data-zone="zone-pond" onclick="handleMarkerClick(event,'zone-pond',425,440)" id="marker-4">
+          <circle cx="425" cy="440" r="19" fill="#0096c7" opacity="0.92"/>
+          <text   x="425"  y="446"  text-anchor="middle" font-size="14">🐸</text>
+          <circle cx="425" cy="440" r="19" fill="none" stroke="white" stroke-width="2.2" opacity="0.85"/>
+        </g>
+        <!-- 수생 5: 연못 우측 -->
+        <g class="map-marker" data-zone="zone-pond" onclick="handleMarkerClick(event,'zone-pond',4935,444)" id="marker-5">
+          <circle cx="493" cy="444" r="19" fill="#0096c7" opacity="0.92"/>
+          <text   x="493"  y="450"  text-anchor="middle" font-size="14">🐟</text>
+          <circle cx="493" cy="444" r="19" fill="none" stroke="white" stroke-width="2.2" opacity="0.85"/>
+        </g>
+      </svg>
+
+      <!-- 마커 팝업 (지도 위에 absolute로 표시) -->
+      <div class="map-popup" id="mapPopup">
+        <div class="map-popup-title" id="mapPopupTitle"></div>
+        <div id="mapPopupList"></div>
+      </div>
+
+      <!-- Legend -->
+      <div class="map-legend">
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#2d6a4f;"></div>
+          <span>식물/나무</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#0096c7;"></div>
+          <span>수생생물</span>
+        </div>
+        <div class="legend-item" style="color:#aaa;font-size:0.7rem;">
+          마커를 클릭하면 정보를 볼 수 있어요
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <!-- Card list view -->
+    <div id="cardListView">
+      <div class="section-title" style="margin-bottom:16px;">생물 정보 카드</div>
+      <div id="bioCardList"></div>
+    </div>
+
+    <!-- Detail view -->
+    <div class="detail-panel" id="detailPanel">
+      <button class="detail-back" onclick="closeDetail()">← 목록으로 돌아가기</button>
+      <div class="detail-img" id="detailImg">🌿</div>
+      <div class="detail-name" id="detailName"></div>
+      <div style="font-size:0.75rem;color:#aaa;font-style:italic;margin-bottom:8px;" id="detailSci"></div>
+      <span class="bio-card-tag" id="detailTag"></span>
+      <p style="font-size:0.82rem;color:var(--text-mid);line-height:1.7;margin-top:12px;" id="detailDesc"></p>
+      <div class="detail-info-grid" id="detailGrid"></div>
+      <div style="font-size:0.75rem;color:#bbb;margin-top:8px;" id="detailDate"></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── DATA (zone 필드 추가: 같은 zone끼리 팝업으로 묶임) ───
+const sampleData = [
+  {
+    id: 0, name: '철쭉', sci: 'Rhododendron schlippenbachii',
+    cat: 'plant', emoji: '🌸', zone: 'zone-left-top',
+    loc: '본관 앞 화단', season: '봄',
+    desc: '봄에 분홍빛 꽃을 피우는 낙엽관목. 학교 화단을 대표하는 식물로, 매년 4~5월에 화려하게 개화합니다.',
+  },
+  {
+    id: 1, name: '느티나무', sci: 'Zelkova serrata',
+    cat: 'plant', emoji: '🌳', zone: 'zone-right-top',
+    loc: '운동장 옆', season: '사계절',
+    desc: '수령 약 30년으로 추정되는 느티나무. 여름에는 시원한 그늘을 제공하며 다양한 새들이 서식합니다.',
+  },
+  {
+    id: 2, name: '매화나무', sci: 'Prunus mume',
+    cat: 'plant', emoji: '🌸', zone: 'zone-front',
+    loc: '도서관 화단', season: '이른 봄',
+    desc: '이른 봄 2~3월에 흰 꽃을 피우는 매화나무. 향기가 진하고 꽃망울이 아름다워 많은 학생들이 좋아합니다.',
+  },
+  {
+    id: 3, name: '소나무', sci: 'Pinus densiflora',
+    cat: 'plant', emoji: '🌲', zone: 'zone-right-bottom',
+    loc: '도서관 옆길', season: '사계절',
+    desc: '한국의 대표적인 상록수. 사계절 내내 푸른 잎을 유지하며 학교의 상징목 역할을 하고 있습니다.',
+  },
+  {
+    id: 6, name: '민들레', sci: 'Taraxacum officinale',
+    cat: 'plant', emoji: '🌼', zone: 'zone-front',
+    loc: '본관 앞 화단', season: '봄~여름',
+    desc: '본관 앞 화단에서 발견된 민들레. 노란 꽃과 하얀 씨앗이 특징이며 이른 봄부터 늦가을까지 관찰됩니다.',
+  },
+  {
+    id: 7, name: '토끼풀', sci: 'Trifolium repens',
+    cat: 'plant', emoji: '🍀', zone: 'zone-front',
+    loc: '본관 앞 화단', season: '봄~가을',
+    desc: '본관 앞 화단에 군락을 이루는 토끼풀. 네잎클로버를 찾는 학생들이 자주 모이는 장소입니다.',
+  },
+  {
+    id: 4, name: '참개구리', sci: 'Rana nigromaculata',
+    cat: 'water', emoji: '🐸', zone: 'zone-pond',
+    loc: '연못 가장자리', season: '봄~여름',
+    desc: '연못에서 가장 흔히 발견되는 개구리. 연못 가장자리 수초 사이에서 주로 관찰되며 울음소리가 큽니다.',
+  },
+  {
+    id: 5, name: '붕어', sci: 'Carassius auratus',
+    cat: 'water', emoji: '🐟', zone: 'zone-pond',
+    loc: '연못 수심 30~50cm', season: '사계절',
+    desc: '연못에 서식하는 붕어. 총 7마리가 확인되었으며 연못 내 생태계의 핵심 구성원입니다.',
+  }
+];
+
+// 구역 한글 이름
+const zoneNames = {
+  'zone-left-top':    '좌상단 화단',
+  'zone-right-top':   '우상단 화단',
+  'zone-front':       '본관 앞 화단',
+  'zone-right-bottom':'우하단 화단',
+  'zone-pond':        '연못',
+};
+
+let bioData = [...sampleData];
+let currentCat = 'all';
+let activePopupZone = null;
+
+// ─── 팝업 위치 계산 ───
+// SVG viewBox(800×530) → 실제 렌더 크기로 좌표 변환
+// 모바일 스크롤 offset도 반영
+function svgToContainerCoords(svgX, svgY) {
+  const svg = document.querySelector('.map-canvas');
+  const container = document.querySelector('.map-container');
+  const vbW = 800, vbH = 530;
+  // offsetWidth/offsetHeight: iOS file:// 환경에서도 안정적
+  const renderedW = svg.offsetWidth  || svg.clientWidth  || 300;
+  const renderedH = svg.offsetHeight || svg.clientHeight || 200;
+  const scaleX = renderedW / vbW;
+  const scaleY = renderedH / vbH;
+  // SVG가 container 안에서 시작하는 오프셋 (보통 0,0)
+  const offsetX = svg.offsetLeft || 0;
+  const offsetY = svg.offsetTop  || 0;
+  return {
+    x: svgX * scaleX + offsetX,
+    y: svgY * scaleY + offsetY,
+  };
+}
+
+// ─── 마커 클릭 핸들러 ───
+function handleMarkerClick(event, zone, svgX, svgY) {
+  event.stopPropagation();
+  const inZone = bioData.filter(b => b.zone === zone);
+
+  // 현재 카테고리 필터 적용
+  const filtered = currentCat === 'all' ? inZone : inZone.filter(b => b.cat === currentCat);
+
+  // 같은 팝업 다시 클릭하면 닫기
+  if (activePopupZone === zone) { closePopup(); return; }
+
+  if (filtered.length === 0) {
+    showToast('현재 필터에 해당하는 생물이 없어요');
+    return;
+  }
+  if (filtered.length === 1) {
+    // 1개면 바로 상세
+    closePopup();
+    openDetail(filtered[0].id);
+    return;
+  }
+
+  // 2개 이상 → 팝업 표시
+  showPopup(zone, filtered, svgX, svgY);
+}
+
+function showPopup(zone, items, svgX, svgY) {
+  activePopupZone = zone;
+  const popup = document.getElementById('mapPopup');
+  const titleEl = document.getElementById('mapPopupTitle');
+  const listEl  = document.getElementById('mapPopupList');
+
+  titleEl.textContent = `📍 ${zoneNames[zone] || zone} (${items.length}종)`;
+  listEl.innerHTML = '';
+  items.forEach(b => {
+    const row = document.createElement('div');
+    row.className = 'map-popup-item';
+    row.innerHTML = `
+      <span class="map-popup-emoji">${b.emoji}</span>
+      <div class="map-popup-info">
+        <div class="map-popup-name">${b.name}</div>
+        <div class="map-popup-loc">${b.loc}</div>
+      </div>`;
+    row.onclick = (e) => { e.stopPropagation(); closePopup(); openDetail(b.id); };
+    row.addEventListener('touchend', function(e){ e.preventDefault(); e.stopPropagation(); closePopup(); openDetail(b.id); });
+    listEl.appendChild(row);
+  });
+
+  // 팝업 위치: 마커 바로 위에
+  const pos = svgToContainerCoords(svgX, svgY);
+  popup.style.left = pos.x + 'px';
+  popup.style.top  = (pos.y - 16) + 'px';   // 마커 위에 살짝 띄움
+  popup.style.transform = 'translateX(-50%) translateY(-100%)';
+  popup.classList.add('open');
+}
+
+function closePopup() {
+  activePopupZone = null;
+  const popup = document.getElementById('mapPopup');
+  popup.classList.remove('open');
+}
+
+// 지도 바깥 클릭 시 팝업 닫기 — init() 안에서 등록됨
+
+// ─── RENDER CARDS ───
+function renderCards() {
+  const list = document.getElementById('bioCardList');
+  const filtered = currentCat === 'all' ? bioData : bioData.filter(b => b.cat === currentCat);
+  list.innerHTML = '';
+  filtered.forEach(b => {
+    const div = document.createElement('div');
+    div.className = 'bio-card';
+    div.id = 'card-' + b.id;
+    div.setAttribute('role', 'button');
+    div.setAttribute('tabindex', '0');
+    div.onclick = () => openDetail(b.id);
+    div.addEventListener('touchend', function(e){ e.preventDefault(); openDetail(b.id); });
+    div.innerHTML = `
+      <div class="bio-card-img">${b.emoji}</div>
+      <div class="bio-card-body">
+        <span class="bio-card-tag tag-${b.cat}">${b.cat==='plant'?'🌿 식물/나무':'🐠 수생생물'}</span>
+        <div class="bio-card-name">${b.name}</div>
+        <div class="bio-card-sci">${b.sci||''}</div>
+        <div class="bio-card-desc">${b.desc}</div>
+        <div class="bio-card-meta">
+          <span>📍 ${b.loc}</span>
+        </div>
+      </div>
+    `;
+    list.appendChild(div);
+  });
+  updateStats();
+}
+
+function updateStats() {
+  document.getElementById('totalCount').textContent = bioData.length;
+  document.getElementById('plantCount').textContent = bioData.filter(b=>b.cat==='plant').length;
+  document.getElementById('waterCount').textContent = bioData.filter(b=>b.cat==='water').length;
+}
+
+// ─── FILTER ───
+function filterCat(cat, el) {
+  currentCat = cat;
+  document.querySelectorAll('.cat-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  closeDetail();
+  closePopup();
+  renderCards();
+}
+
+// ─── DETAIL ───
+function openDetail(id) {
+  const b = bioData.find(x=>x.id===id);
+  if(!b) return;
+  document.getElementById('cardListView').style.display = 'none';
+  const panel = document.getElementById('detailPanel');
+  panel.classList.add('open');
+  document.getElementById('detailImg').textContent = b.emoji;
+  document.getElementById('detailName').textContent = b.name;
+  document.getElementById('detailSci').textContent = b.sci||'';
+  const tag = document.getElementById('detailTag');
+  tag.textContent = b.cat==='plant' ? '🌿 식물/나무' : '🐠 수생생물';
+  tag.className = 'bio-card-tag tag-'+b.cat;
+  document.getElementById('detailDesc').textContent = b.desc;
+  document.getElementById('detailGrid').innerHTML = `
+    <div class="detail-info-item"><div class="key">위치</div><div class="val">${b.loc}</div></div>
+    <div class="detail-info-item"><div class="key">관찰 계절</div><div class="val">${b.season}</div></div>
+    <div class="detail-info-item"><div class="key">분류</div><div class="val">${b.cat==='plant'?'식물':'수생생물'}</div></div>
+    <div class="detail-info-item"><div class="key">카드 번호</div><div class="val">#${String(b.id+1).padStart(3,'0')}</div></div>
+  `;
+}
+
+function closeDetail() {
+  document.getElementById('cardListView').style.display = 'block';
+  document.getElementById('detailPanel').classList.remove('open');
+}
+
+// ─── TOAST ───
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ─── INIT ───
+function init() {
+  renderCards();
+
+  // 지도 바깥 클릭/터치 시 팝업 닫기
+  document.addEventListener('click', function(e) {
+    const popup = document.getElementById('mapPopup');
+    if (popup && !popup.contains(e.target)) closePopup();
+  });
+  document.addEventListener('touchend', function(e) {
+    const popup = document.getElementById('mapPopup');
+    if (popup && popup.classList.contains('open') && !popup.contains(e.target)) closePopup();
+  });
+
+  // iOS Safari: SVG 마커에 touchend 이벤트 추가 (file:// 직접 열기 대응)
+  document.querySelectorAll('.map-marker').forEach(function(marker) {
+    var zone = marker.getAttribute('data-zone');
+    var onclickStr = marker.getAttribute('onclick') || '';
+    var coords = onclickStr.match(/handleMarkerClick\(event,'[^']+',(\d+\.?\d*),(\d+\.?\d*)\)/);
+    var svgX = coords ? parseFloat(coords[1]) : 0;
+    var svgY = coords ? parseFloat(coords[2]) : 0;
+    marker.addEventListener('touchend', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      handleMarkerClick(e, zone, svgX, svgY);
+    });
+  });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+</script>
+</body>
+</html>
